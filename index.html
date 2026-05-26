@@ -1,0 +1,1737 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>ContractOps Demo</title>
+
+  <style>
+    :root {
+      --bg: #080b0f;
+      --bg2: #101722;
+      --card: #141c27;
+      --card2: #0f1620;
+      --gold: #d6aa32;
+      --gold2: #f3d37a;
+      --text: #f3f4f6;
+      --muted: #9ca3af;
+      --green: #22c55e;
+      --red: #ef4444;
+      --orange: #f59e0b;
+      --blue: #38bdf8;
+      --border: rgba(255,255,255,0.09);
+      --shadow: 0 18px 45px rgba(0,0,0,0.5);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top left, rgba(214,170,50,0.16), transparent 33%),
+        radial-gradient(circle at bottom right, rgba(56,189,248,0.08), transparent 32%),
+        linear-gradient(180deg, #070a0f, #101722);
+      color: var(--text);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit;
+    }
+
+    button {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 13px;
+      font-weight: 800;
+      cursor: pointer;
+      color: white;
+      background: linear-gradient(180deg, #293445, #151b25);
+    }
+
+    button:hover {
+      opacity: 0.92;
+    }
+
+    button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      background: #0d131c;
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px;
+      outline: none;
+    }
+
+    .btn-gold {
+      background: linear-gradient(180deg, #92701e, #4c3a12);
+      border-color: rgba(214,170,50,0.45);
+      color: #fff4c7;
+    }
+
+    .btn-green {
+      background: linear-gradient(180deg, #1f7a42, #0e3b20);
+    }
+
+    .btn-red {
+      background: linear-gradient(180deg, #7f1d1d, #3f1010);
+    }
+
+    .btn-blue {
+      background: linear-gradient(180deg, #075985, #082f49);
+    }
+
+    .btn-orange {
+      background: linear-gradient(180deg, #a16207, #4a2d05);
+    }
+
+    .app {
+      width: 100%;
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 18px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      padding: 16px;
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.075), rgba(255,255,255,0.035));
+      box-shadow: var(--shadow);
+      flex-wrap: wrap;
+    }
+
+    .brand-title {
+      font-size: 1.55rem;
+      font-weight: 950;
+      color: var(--gold2);
+    }
+
+    .brand-sub {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-top: 3px;
+    }
+
+    .top-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.05);
+      padding: 7px 10px;
+      border-radius: 999px;
+      color: var(--muted);
+      font-size: 0.86rem;
+    }
+
+    .tabbar {
+      display: flex;
+      gap: 8px;
+      margin: 16px 0;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+
+    .tab-btn {
+      white-space: nowrap;
+      border: 1px solid rgba(214,170,50,0.25);
+      background: rgba(255,255,255,0.05);
+      color: #f3f4f6;
+      border-radius: 999px;
+      padding: 10px 14px;
+      font-weight: 900;
+    }
+
+    .tab-btn.active {
+      background: linear-gradient(180deg, #92701e, #4c3a12);
+      color: #fff4c7;
+      border-color: rgba(214,170,50,0.55);
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .panel {
+      border-radius: 22px;
+      border: 1px solid var(--border);
+      background: linear-gradient(180deg, var(--card), var(--card2));
+      box-shadow: var(--shadow);
+      margin-bottom: 16px;
+      overflow: hidden;
+    }
+
+    .panel.pad {
+      padding: 14px;
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 15px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(255,255,255,0.035);
+      flex-wrap: wrap;
+    }
+
+    h1,
+    h2,
+    h3 {
+      margin: 0;
+    }
+
+    h2,
+    h3 {
+      color: var(--gold2);
+    }
+
+    h2 {
+      font-size: 1.15rem;
+    }
+
+    h3 {
+      font-size: 1rem;
+      margin-bottom: 8px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+      gap: 14px;
+      padding: 14px;
+    }
+
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      padding: 14px;
+    }
+
+    .metric {
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 14px;
+      background: rgba(255,255,255,0.045);
+    }
+
+    .metric-number {
+      font-size: 1.75rem;
+      font-weight: 950;
+      color: var(--gold);
+    }
+
+    .metric-label {
+      color: var(--muted);
+      font-size: 0.87rem;
+      margin-top: 3px;
+    }
+
+    .card {
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 13px;
+      background: rgba(255,255,255,0.045);
+    }
+
+    .card-title {
+      font-weight: 950;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    .card-meta {
+      color: var(--muted);
+      font-size: 0.88rem;
+      line-height: 1.45;
+    }
+
+    .card-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin-top: 12px;
+    }
+
+    .status {
+      display: inline-flex;
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.06);
+      font-size: 0.76rem;
+      font-weight: 900;
+      color: var(--muted);
+    }
+
+    .status.good {
+      color: #b7f7cc;
+      background: rgba(34,197,94,0.12);
+      border-color: rgba(34,197,94,0.24);
+    }
+
+    .status.warn {
+      color: #ffd99a;
+      background: rgba(245,158,11,0.12);
+      border-color: rgba(245,158,11,0.28);
+    }
+
+    .status.bad {
+      color: #fecaca;
+      background: rgba(239,68,68,0.12);
+      border-color: rgba(239,68,68,0.3);
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 10px;
+      padding: 14px;
+    }
+
+    .branch-card {
+      cursor: pointer;
+      transition: transform 0.15s ease, border-color 0.15s ease;
+    }
+
+    .branch-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(214,170,50,0.45);
+    }
+
+    .branch-card.active {
+      border-color: rgba(214,170,50,0.75);
+      box-shadow: 0 0 0 3px rgba(214,170,50,0.12);
+    }
+
+    .list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: 14px;
+    }
+
+    .notice {
+      margin: 14px;
+      padding: 12px;
+      border-radius: 14px;
+      border: 1px dashed rgba(214,170,50,0.35);
+      background: rgba(214,170,50,0.08);
+      color: #f4df9b;
+      line-height: 1.45;
+    }
+
+    .split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      padding: 14px;
+    }
+
+    .check-list {
+      display: grid;
+      gap: 7px;
+      margin-top: 10px;
+    }
+
+    .check-list label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    .check-list input {
+      width: auto;
+    }
+
+    .log {
+      max-height: 430px;
+      overflow: auto;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .log-item {
+      border-left: 3px solid rgba(214,170,50,0.55);
+      padding: 8px 10px;
+      background: rgba(255,255,255,0.04);
+      border-radius: 10px;
+      color: var(--muted);
+      font-size: 0.86rem;
+    }
+
+    .empty {
+      padding: 14px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .danger-zone {
+      border-color: rgba(239,68,68,0.25);
+      background: rgba(239,68,68,0.06);
+    }
+
+    @media (max-width: 760px) {
+      .split {
+        grid-template-columns: 1fr;
+      }
+
+      .brand-title {
+        font-size: 1.35rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div>
+        <div class="brand-title">ContractOps</div>
+        <div class="brand-sub">Realistischer Business-Simulator · Verträge · NPCs · Cashflow</div>
+      </div>
+
+      <div class="top-actions">
+        <span id="dayPill" class="pill">Tag 1</span>
+        <span id="branchPill" class="pill">Keine Firma</span>
+        <button id="nextDayBtn" class="btn-gold">Nächster Tag</button>
+        <button id="saveBtn" class="btn-green">Speichern</button>
+      </div>
+    </header>
+
+    <nav class="tabbar">
+      <button class="tab-btn active" data-tab="company">🏢 Firma</button>
+      <button class="tab-btn" data-tab="branches">🌍 Branchen</button>
+      <button class="tab-btn" data-tab="requests">📥 Anfragen</button>
+      <button class="tab-btn" data-tab="contracts">📄 Verträge</button>
+      <button class="tab-btn" data-tab="npcs">👥 NPCs</button>
+      <button class="tab-btn" data-tab="equipment">📦 Equipment</button>
+      <button class="tab-btn" data-tab="finance">💶 Finanzen</button>
+      <button class="tab-btn" data-tab="report">📊 Bericht</button>
+      <button class="tab-btn" data-tab="settings">⚙️ Einstellungen</button>
+    </nav>
+
+    <section id="tab-company" class="tab-content active">
+      <div class="panel">
+        <div class="section-header">
+          <h2>🏢 Firmenzentrale</h2>
+          <span class="pill">localStorage Demo · Firebase später</span>
+        </div>
+
+        <div id="setupBox" class="form-grid">
+          <input id="companyNameInput" placeholder="Firmenname, z. B. Göttle Operations">
+          <select id="startBranchSelect"></select>
+          <select id="difficultySelect">
+            <option value="easy">Leicht · 5.000 € Startkapital</option>
+            <option value="normal" selected>Normal · 2.500 € Startkapital</option>
+            <option value="hard">Hart · 1.200 € Startkapital</option>
+          </select>
+          <button id="startCompanyBtn" class="btn-gold">Firma gründen</button>
+        </div>
+
+        <div id="companyDashboard" class="metric-grid"></div>
+
+        <div class="notice">
+          Das ist eine lokale GitHub-Demo. Daten werden im Browser gespeichert. Später ersetzen wir die Speicherfunktionen durch Firebase, damit echte Gruppen/Accounts möglich werden.
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-branches" class="tab-content">
+      <div class="panel">
+        <div class="section-header">
+          <h2>🌍 Branchen</h2>
+          <span class="pill">Mehr Branchen = mehr Vertragsarten</span>
+        </div>
+        <div id="branchGrid" class="grid"></div>
+      </div>
+    </section>
+
+    <section id="tab-requests" class="tab-content">
+      <div class="panel">
+        <div class="section-header">
+          <h2>📥 Vertragsanfragen</h2>
+          <div class="top-actions">
+            <button id="generateRequestBtn" class="btn-gold">Neue Anfrage generieren</button>
+            <button id="generateThreeBtn" class="btn-blue">3 Anfragen</button>
+          </div>
+        </div>
+        <div id="requestList" class="list"></div>
+      </div>
+    </section>
+
+    <section id="tab-contracts" class="tab-content">
+      <div class="panel">
+        <div class="section-header">
+          <h2>📄 Verträge</h2>
+          <span class="pill">NPCs zuweisen · Auftrag starten · Zahlung abwarten</span>
+        </div>
+        <div id="contractList" class="list"></div>
+      </div>
+    </section>
+
+    <section id="tab-npcs" class="tab-content">
+      <div class="panel">
+        <div class="section-header">
+          <h2>👥 NPC-Personal</h2>
+          <button id="generateApplicantsBtn" class="btn-gold">Bewerber suchen</button>
+        </div>
+
+        <div class="split">
+          <div class="panel pad">
+            <h3>Angestellte</h3>
+            <div id="employeeList" class="list" style="padding:0;"></div>
+          </div>
+
+          <div class="panel pad">
+            <h3>Bewerber</h3>
+            <div id="applicantList" class="list" style="padding:0;"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-equipment" class="tab-content">
+      <div class="panel">
+        <div class="section-header">
+          <h2>📦 Equipment</h2>
+          <span class="pill">Equipment senkt Risiko und erlaubt bessere Verträge</span>
+        </div>
+
+        <div class="split">
+          <div class="panel pad">
+            <h3>Besitz</h3>
+            <div id="ownedEquipmentList" class="list" style="padding:0;"></div>
+          </div>
+
+          <div class="panel pad">
+            <h3>Shop</h3>
+            <div id="equipmentShopList" class="list" style="padding:0;"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-finance" class="tab-content">
+      <div class="panel">
+        <div class="section-header">
+          <h2>💶 Finanzen</h2>
+          <span class="pill">Cashflow ist wichtiger als Papiergewinn</span>
+        </div>
+
+        <div id="financeDashboard" class="metric-grid"></div>
+
+        <div class="split">
+          <div class="panel pad">
+            <h3>Offene Forderungen</h3>
+            <div id="receivableList" class="list" style="padding:0;"></div>
+          </div>
+
+          <div class="panel pad">
+            <h3>Finanz-Log</h3>
+            <div id="financeLog" class="log" style="padding:0;"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-report" class="tab-content">
+      <div class="panel">
+        <div class="section-header">
+          <h2>📊 Bericht</h2>
+          <button id="printReportBtn" class="btn-gold">Bericht drucken</button>
+        </div>
+        <div id="reportBox" class="list"></div>
+      </div>
+    </section>
+
+    <section id="tab-settings" class="tab-content">
+      <div class="panel">
+        <div class="section-header">
+          <h2>⚙️ Einstellungen</h2>
+          <span class="pill">Demo-Verwaltung</span>
+        </div>
+
+        <div class="form-grid">
+          <button id="exportBtn" class="btn-blue">Spielstand exportieren</button>
+          <button id="importBtn" class="btn-green">Spielstand importieren</button>
+          <button id="resetBtn" class="btn-red">Spielstand löschen</button>
+        </div>
+
+        <div class="panel pad danger-zone">
+          <h3>Firebase später</h3>
+          <div class="card-meta">
+            Diese Demo speichert lokal. Für Firebase bauen wir später:
+            Login, Gruppen/Companies, Cloud-Speicherung, echte Invite-Codes und Rechte.
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const STORAGE_KEY = "contractops_demo_v1";
+
+    const BRANCHES = [
+      {
+        id: "logistics",
+        name: "Logistik",
+        icon: "🚚",
+        desc: "Kurierfahrten, Palettentransport, Expresslieferungen.",
+        roles: ["Fahrer", "Lagerkraft", "Dispatcher", "Aushilfe"],
+        starterEquipment: ["Laptop", "Transportwagen"],
+        equipment: ["Transporter", "Hubwagen", "Lagerregal", "Scanner", "Anhänger"],
+        templates: [
+          "Expresslieferung für Geschäftskunden",
+          "Palettentransport zwischen zwei Standorten",
+          "Kurierfahrt mit enger Frist",
+          "Lagerauftrag mit Kommissionierung"
+        ]
+      },
+      {
+        id: "fulfillment",
+        name: "Fulfillment",
+        icon: "📦",
+        desc: "Pick & Pack, Retouren, Lagerkunden, Verpackung.",
+        roles: ["Lagerkraft", "Packer", "Kundenbetreuer", "Teamleiter"],
+        starterEquipment: ["Laptop", "Lagerregal"],
+        equipment: ["Scanner", "Etikettendrucker", "Packtisch", "Hubwagen", "Regalsystem"],
+        templates: [
+          "Pick & Pack für kleinen Onlineshop",
+          "Retourenbearbeitung für Händler",
+          "Lagerung und Versand von Aktionsware",
+          "Verpackungsservice mit Tagesfrist"
+        ]
+      },
+      {
+        id: "agriculture",
+        name: "Landwirtschaft",
+        icon: "🌾",
+        desc: "Erntehilfe, Hofservice, Transport, Grundstückspflege.",
+        roles: ["Hofarbeiter", "Fahrer", "Maschinenführer", "Aushilfe"],
+        starterEquipment: ["Handwerkzeug", "Anhänger klein"],
+        equipment: ["Motorsense", "Anhänger", "Kleintraktor", "Schutzausrüstung", "Mähwerk"],
+        templates: [
+          "Erntehilfe für Familienbetrieb",
+          "Futtertransport zwischen Höfen",
+          "Hofreinigung nach Saisonarbeit",
+          "Mäharbeiten auf großem Grundstück"
+        ]
+      },
+      {
+        id: "retail",
+        name: "Einzelhandel",
+        icon: "🛒",
+        desc: "Kiosk, kleiner Laden, Warenbestand, Inventur.",
+        roles: ["Verkäufer", "Lagerkraft", "Aushilfe", "Filialleitung"],
+        starterEquipment: ["Kasse", "Regal"],
+        equipment: ["Kühlschrank", "Scanner", "Warenregal", "Kassensystem", "Lagerboxen"],
+        templates: [
+          "Sonderverkauf am Wochenende",
+          "Inventurauftrag für kleinen Laden",
+          "Regalbefüllung für Saisonware",
+          "Großbestellung Getränke vorbereiten"
+        ]
+      },
+      {
+        id: "security",
+        name: "Security",
+        icon: "🛡️",
+        desc: "Objektschutz, Eventschutz, Nachtwache.",
+        roles: ["Security", "Teamleiter", "Fahrer", "Dispatcher"],
+        starterEquipment: ["Dienstkleidung", "Telefon"],
+        equipment: ["Funkgeräte", "Warnwesten", "Absperrmaterial", "Bodycam-Dummy", "Dienstfahrzeug"],
+        templates: [
+          "Eventschutz für private Veranstaltung",
+          "Nachtwache auf Betriebsgelände",
+          "Parkplatzkontrolle bei Messe",
+          "Objektschutz mit Kontrollrunden"
+        ]
+      }
+    ];
+
+    const GENERAL_EQUIPMENT = [
+      { name: "Laptop", cost: 450, upkeep: 2, bonus: 2 },
+      { name: "Telefon", cost: 180, upkeep: 1, bonus: 1 },
+      { name: "Transporter", cost: 4500, upkeep: 35, bonus: 10 },
+      { name: "Arbeitskleidung", cost: 300, upkeep: 3, bonus: 3 },
+      { name: "Bürosoftware", cost: 250, upkeep: 5, bonus: 4 }
+    ];
+
+    const FIRST_NAMES = ["Kevin", "Lisa", "Mohsin", "Sarah", "Tim", "Anna", "Mehmet", "Jonas", "Nina", "Marco", "Lea", "Paul"];
+    const LAST_NAMES = ["Bauer", "Schmidt", "Keller", "Fischer", "Wagner", "Hofmann", "Becker", "Wolf", "Neumann", "Hartmann"];
+    const CUSTOMER_NAMES = [
+      "Müller Feinkost GmbH",
+      "Hof Sonnenfeld",
+      "City Eventservice",
+      "Kaiser Handel",
+      "Nordtor Logistik",
+      "Wald & Wiese GbR",
+      "Bergmann Immobilien",
+      "QuickStore Markt"
+    ];
+
+    const el = {
+      dayPill: document.getElementById("dayPill"),
+      branchPill: document.getElementById("branchPill"),
+      nextDayBtn: document.getElementById("nextDayBtn"),
+      saveBtn: document.getElementById("saveBtn"),
+      setupBox: document.getElementById("setupBox"),
+      companyDashboard: document.getElementById("companyDashboard"),
+      companyNameInput: document.getElementById("companyNameInput"),
+      startBranchSelect: document.getElementById("startBranchSelect"),
+      difficultySelect: document.getElementById("difficultySelect"),
+      startCompanyBtn: document.getElementById("startCompanyBtn"),
+      branchGrid: document.getElementById("branchGrid"),
+      generateRequestBtn: document.getElementById("generateRequestBtn"),
+      generateThreeBtn: document.getElementById("generateThreeBtn"),
+      requestList: document.getElementById("requestList"),
+      contractList: document.getElementById("contractList"),
+      generateApplicantsBtn: document.getElementById("generateApplicantsBtn"),
+      employeeList: document.getElementById("employeeList"),
+      applicantList: document.getElementById("applicantList"),
+      ownedEquipmentList: document.getElementById("ownedEquipmentList"),
+      equipmentShopList: document.getElementById("equipmentShopList"),
+      financeDashboard: document.getElementById("financeDashboard"),
+      receivableList: document.getElementById("receivableList"),
+      financeLog: document.getElementById("financeLog"),
+      reportBox: document.getElementById("reportBox"),
+      printReportBtn: document.getElementById("printReportBtn"),
+      exportBtn: document.getElementById("exportBtn"),
+      importBtn: document.getElementById("importBtn"),
+      resetBtn: document.getElementById("resetBtn")
+    };
+
+    let state = createEmptyState();
+
+    function createEmptyState() {
+      return {
+        started: false,
+        companyName: "",
+        branchId: "logistics",
+        day: 1,
+        cash: 2500,
+        reputation: 10,
+        stress: 0,
+        completedContracts: 0,
+        failedContracts: 0,
+        requests: [],
+        contracts: [],
+        employees: [],
+        applicants: [],
+        equipment: [],
+        receivables: [],
+        log: []
+      };
+    }
+
+    function uid(prefix = "id") {
+      return prefix + "_" + Math.random().toString(36).slice(2, 9) + "_" + Date.now().toString(36);
+    }
+
+    function euro(value) {
+      return Math.round(value).toLocaleString("de-DE") + " €";
+    }
+
+    function clamp(value, min, max) {
+      return Math.max(min, Math.min(max, value));
+    }
+
+    function pick(arr) {
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    function rand(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function getBranch(id = state.branchId) {
+      return BRANCHES.find(b => b.id === id) || BRANCHES[0];
+    }
+
+    function getEquipmentShop() {
+      const branch = getBranch();
+      const branchItems = branch.equipment.map((name, index) => ({
+        name,
+        cost: 350 + index * 420 + rand(0, 180),
+        upkeep: 2 + index * 3,
+        bonus: 3 + index * 2
+      }));
+
+      const merged = [...GENERAL_EQUIPMENT, ...branchItems];
+      const unique = [];
+
+      merged.forEach(item => {
+        if (!unique.some(x => x.name === item.name)) unique.push(item);
+      });
+
+      return unique;
+    }
+
+    function addLog(text, type = "info") {
+      state.log.unshift({
+        id: uid("log"),
+        day: state.day,
+        text,
+        type
+      });
+
+      state.log = state.log.slice(0, 80);
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      renderAll();
+    }
+
+    function loadState() {
+      const raw = localStorage.getItem(STORAGE_KEY);
+
+      if (!raw) {
+        state = createEmptyState();
+        return;
+      }
+
+      try {
+        state = JSON.parse(raw);
+      } catch {
+        state = createEmptyState();
+      }
+    }
+
+    function setupTabs() {
+      document.querySelectorAll(".tab-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          document.querySelectorAll(".tab-btn").forEach(x => x.classList.remove("active"));
+          document.querySelectorAll(".tab-content").forEach(x => x.classList.remove("active"));
+
+          btn.classList.add("active");
+          document.getElementById("tab-" + btn.dataset.tab).classList.add("active");
+        });
+      });
+    }
+
+    function initSelectors() {
+      el.startBranchSelect.innerHTML = BRANCHES.map(branch => (
+        `<option value="${branch.id}">${branch.icon} ${branch.name}</option>`
+      )).join("");
+    }
+
+    function startCompany() {
+      const name = el.companyNameInput.value.trim() || "Neue Firma";
+      const branchId = el.startBranchSelect.value;
+      const difficulty = el.difficultySelect.value;
+
+      const cashByDifficulty = {
+        easy: 5000,
+        normal: 2500,
+        hard: 1200
+      };
+
+      state = createEmptyState();
+      state.started = true;
+      state.companyName = name;
+      state.branchId = branchId;
+      state.cash = cashByDifficulty[difficulty] || 2500;
+
+      const branch = getBranch(branchId);
+      state.equipment = branch.starterEquipment.map(name => ({
+        id: uid("eq"),
+        name,
+        condition: rand(75, 100),
+        upkeep: 1,
+        bonus: 1
+      }));
+
+      addLog(`${name} wurde in der Branche ${branch.name} gegründet. Startkapital: ${euro(state.cash)}.`, "good");
+
+      generateApplicants(3);
+      generateRequest();
+      generateRequest();
+
+      saveState();
+    }
+
+    function generateRequest() {
+      if (!state.started) return alert("Erst Firma gründen.");
+
+      const branch = getBranch();
+      const template = pick(branch.templates);
+      const customer = pick(CUSTOMER_NAMES);
+
+      const base = 350 + state.reputation * 18 + rand(0, 450);
+      const complexity = rand(1, 5);
+      const revenue = Math.round(base * (1 + complexity * 0.22));
+      const costs = Math.round(revenue * (0.22 + complexity * 0.035));
+      const paymentDays = pick([3, 7, 14, 21, 30]);
+      const durationDays = rand(1, 5 + complexity);
+      const penalty = Math.round(revenue * (0.12 + complexity * 0.025));
+      const risk = clamp(12 + complexity * 9 + rand(-5, 12) - Math.floor(state.reputation / 8), 5, 85);
+
+      const requiredCount = complexity >= 4 ? 2 : 1;
+      const requiredRoles = [];
+
+      for (let i = 0; i < requiredCount; i++) {
+        requiredRoles.push(pick(branch.roles));
+      }
+
+      const requiredEquipment = [];
+      if (complexity >= 3) requiredEquipment.push(pick(branch.equipment));
+      if (complexity >= 5) requiredEquipment.push(pick(branch.equipment));
+
+      const request = {
+        id: uid("req"),
+        branchId: state.branchId,
+        customer,
+        title: template,
+        service: template,
+        revenue,
+        costs,
+        paymentDays,
+        durationDays,
+        deadlineDays: rand(2, 8),
+        penalty,
+        risk,
+        requiredRoles,
+        requiredEquipment: [...new Set(requiredEquipment)],
+        status: "request",
+        createdDay: state.day
+      };
+
+      state.requests.unshift(request);
+      addLog(`Neue Anfrage: ${customer} · ${template} · ${euro(revenue)}.`, "info");
+
+      saveState();
+    }
+
+    function generateApplicants(count = 2) {
+      if (!state.started) return alert("Erst Firma gründen.");
+
+      const branch = getBranch();
+
+      for (let i = 0; i < count; i++) {
+        const skill = rand(25, 85);
+        const reliability = rand(35, 95);
+        const stressResist = rand(30, 90);
+        const role = pick(branch.roles);
+
+        state.applicants.push({
+          id: uid("app"),
+          name: pick(FIRST_NAMES) + " " + pick(LAST_NAMES),
+          role,
+          skill,
+          reliability,
+          stressResist,
+          costPerDay: Math.round(45 + skill * 0.9 + reliability * 0.4),
+          status: "Bewerber"
+        });
+      }
+
+      addLog(`${count} neue Bewerber gefunden.`, "info");
+      saveState();
+    }
+
+    function acceptRequest(id, multiplier = 1) {
+      const index = state.requests.findIndex(r => r.id === id);
+      if (index === -1) return;
+
+      const req = state.requests[index];
+
+      const contract = {
+        ...req,
+        id: uid("con"),
+        requestId: req.id,
+        revenue: Math.round(req.revenue * multiplier),
+        status: "active",
+        assignedNpcIds: [],
+        remainingDays: req.durationDays,
+        acceptedDay: state.day,
+        startedDay: null,
+        completedDay: null
+      };
+
+      state.contracts.unshift(contract);
+      state.requests.splice(index, 1);
+
+      addLog(`Vertrag angenommen: ${req.customer} · ${req.title} · ${euro(contract.revenue)}.`, "good");
+      saveState();
+    }
+
+    function rejectRequest(id) {
+      const index = state.requests.findIndex(r => r.id === id);
+      if (index === -1) return;
+
+      const req = state.requests[index];
+      state.requests.splice(index, 1);
+      addLog(`Anfrage abgelehnt: ${req.customer} · ${req.title}.`, "info");
+      saveState();
+    }
+
+    function hireApplicant(id) {
+      const index = state.applicants.findIndex(a => a.id === id);
+      if (index === -1) return;
+
+      const applicant = state.applicants[index];
+
+      if (state.cash < applicant.costPerDay) {
+        alert("Zu wenig Kapital für Einstellung/Startkosten.");
+        return;
+      }
+
+      state.cash -= applicant.costPerDay;
+      state.employees.push({
+        ...applicant,
+        id: uid("npc"),
+        status: "frei",
+        xp: 0,
+        morale: rand(55, 90)
+      });
+
+      state.applicants.splice(index, 1);
+      addLog(`${applicant.name} wurde als ${applicant.role} eingestellt. Startkosten: ${euro(applicant.costPerDay)}.`, "good");
+
+      saveState();
+    }
+
+    function fireEmployee(id) {
+      const npc = state.employees.find(e => e.id === id);
+      if (!npc) return;
+
+      if (!confirm(`${npc.name} wirklich entlassen?`)) return;
+
+      state.employees = state.employees.filter(e => e.id !== id);
+      state.contracts.forEach(contract => {
+        contract.assignedNpcIds = contract.assignedNpcIds.filter(npcId => npcId !== id);
+      });
+
+      addLog(`${npc.name} wurde entlassen.`, "warn");
+      saveState();
+    }
+
+    function buyEquipment(itemName) {
+      const item = getEquipmentShop().find(x => x.name === itemName);
+      if (!item) return;
+
+      if (state.cash < item.cost) {
+        alert("Zu wenig Kapital.");
+        return;
+      }
+
+      state.cash -= item.cost;
+
+      state.equipment.push({
+        id: uid("eq"),
+        name: item.name,
+        condition: rand(80, 100),
+        upkeep: item.upkeep,
+        bonus: item.bonus
+      });
+
+      addLog(`Equipment gekauft: ${item.name} für ${euro(item.cost)}.`, "good");
+      saveState();
+    }
+
+    function assignEmployees(contractId) {
+      const contract = state.contracts.find(c => c.id === contractId);
+      if (!contract) return;
+
+      const checked = Array.from(document.querySelectorAll(`[data-assign="${contractId}"]:checked`))
+        .map(x => x.value);
+
+      contract.assignedNpcIds = checked;
+      addLog(`NPCs für Vertrag ${contract.customer} zugewiesen: ${checked.length}.`, "info");
+      saveState();
+    }
+
+    function hasRequiredEquipment(contract) {
+      return contract.requiredEquipment.every(req =>
+        state.equipment.some(eq => eq.name === req)
+      );
+    }
+
+    function calculateTeamScore(contract) {
+      const assigned = contract.assignedNpcIds
+        .map(id => state.employees.find(e => e.id === id))
+        .filter(Boolean);
+
+      if (assigned.length === 0) return 0;
+
+      const avgSkill = assigned.reduce((sum, npc) => sum + npc.skill, 0) / assigned.length;
+      const avgReliability = assigned.reduce((sum, npc) => sum + npc.reliability, 0) / assigned.length;
+      const avgStress = assigned.reduce((sum, npc) => sum + npc.stressResist, 0) / assigned.length;
+      const eqBonus = state.equipment.reduce((sum, eq) => sum + (eq.bonus || 0), 0);
+
+      return Math.round((avgSkill * 0.45) + (avgReliability * 0.35) + (avgStress * 0.2) + eqBonus);
+    }
+
+    function startContract(id) {
+      const contract = state.contracts.find(c => c.id === id);
+      if (!contract || contract.status !== "active") return;
+
+      const requiredPeople = contract.requiredRoles.length;
+
+      if (contract.assignedNpcIds.length < requiredPeople) {
+        alert(`Zu wenige NPCs zugewiesen. Benötigt: ${requiredPeople}`);
+        return;
+      }
+
+      if (!hasRequiredEquipment(contract)) {
+        const proceed = confirm("Equipment fehlt. Auftrag trotzdem starten? Risiko steigt deutlich.");
+        if (!proceed) return;
+      }
+
+      const upfront = Math.round(contract.costs * 0.55);
+
+      if (state.cash < upfront) {
+        alert(`Zu wenig Kapital für Vorkosten. Benötigt: ${euro(upfront)}`);
+        return;
+      }
+
+      state.cash -= upfront;
+      contract.status = "inProgress";
+      contract.startedDay = state.day;
+      contract.remainingDays = contract.durationDays;
+      contract.upfrontPaid = upfront;
+
+      state.stress = clamp(state.stress + 5 + contract.risk / 10, 0, 100);
+
+      addLog(`Auftrag gestartet: ${contract.customer}. Vorkosten: ${euro(upfront)}.`, "warn");
+      saveState();
+    }
+
+    function completeContract(id) {
+      const contract = state.contracts.find(c => c.id === id);
+      if (!contract || contract.status !== "inProgress") return;
+
+      if (contract.remainingDays > 0) {
+        const proceed = confirm("Der Auftrag ist noch nicht vollständig durchgelaufen. Vorzeitig abschließen erhöht Risiko. Trotzdem?");
+        if (!proceed) return;
+      }
+
+      const teamScore = calculateTeamScore(contract);
+      const missingEquipmentPenalty = hasRequiredEquipment(contract) ? 0 : 22;
+      const stressPenalty = Math.floor(state.stress / 4);
+      const successChance = clamp(teamScore - contract.risk - missingEquipmentPenalty - stressPenalty + 45, 5, 95);
+      const roll = rand(1, 100);
+      const success = roll <= successChance;
+
+      if (success) {
+        contract.status = "waitingPayment";
+        contract.completedDay = state.day;
+        contract.paymentDueDay = state.day + contract.paymentDays;
+
+        const remainingCosts = Math.max(0, contract.costs - (contract.upfrontPaid || 0));
+        state.cash -= remainingCosts;
+
+        state.receivables.push({
+          id: uid("rec"),
+          contractId: contract.id,
+          customer: contract.customer,
+          amount: contract.revenue,
+          dueDay: contract.paymentDueDay
+        });
+
+        state.reputation = clamp(state.reputation + rand(2, 6), 0, 100);
+        state.stress = clamp(state.stress - rand(2, 8), 0, 100);
+        state.completedContracts += 1;
+
+        addLog(`Auftrag erfolgreich abgeschlossen: ${contract.customer}. Forderung: ${euro(contract.revenue)} fällig an Tag ${contract.paymentDueDay}.`, "good");
+      } else {
+        contract.status = "failed";
+        contract.completedDay = state.day;
+
+        const damage = contract.penalty + Math.round(contract.costs * 0.4);
+        state.cash -= damage;
+        state.reputation = clamp(state.reputation - rand(4, 10), 0, 100);
+        state.stress = clamp(state.stress + rand(8, 18), 0, 100);
+        state.failedContracts += 1;
+
+        addLog(`Auftrag gescheitert: ${contract.customer}. Schaden/Strafe: ${euro(damage)}. Erfolgschance war ${successChance}%.`, "bad");
+      }
+
+      saveState();
+    }
+
+    function nextDay() {
+      if (!state.started) return alert("Erst Firma gründen.");
+
+      state.day += 1;
+
+      state.contracts.forEach(contract => {
+        if (contract.status === "inProgress" && contract.remainingDays > 0) {
+          contract.remainingDays -= 1;
+        }
+      });
+
+      const payroll = state.employees.reduce((sum, npc) => sum + npc.costPerDay, 0);
+      const upkeep = state.equipment.reduce((sum, eq) => sum + (eq.upkeep || 0), 0);
+      const fixedCost = 35 + Math.floor(state.employees.length * 8);
+      const dailyCost = payroll + upkeep + fixedCost;
+
+      state.cash -= dailyCost;
+
+      if (dailyCost > 0) {
+        addLog(`Tageskosten bezahlt: Personal ${euro(payroll)}, Equipment ${euro(upkeep)}, Fixkosten ${euro(fixedCost)}.`, "warn");
+      }
+
+      const dueReceivables = state.receivables.filter(r => r.dueDay <= state.day);
+
+      dueReceivables.forEach(r => {
+        const delayRisk = rand(1, 100);
+
+        if (delayRisk <= 12) {
+          r.dueDay += rand(2, 8);
+          addLog(`${r.customer} zahlt verspätet. Neues Zahlungsziel: Tag ${r.dueDay}.`, "bad");
+          return;
+        }
+
+        state.cash += r.amount;
+        addLog(`Zahlung eingegangen von ${r.customer}: ${euro(r.amount)}.`, "good");
+
+        state.contracts.forEach(c => {
+          if (c.id === r.contractId && c.status === "waitingPayment") {
+            c.status = "paid";
+          }
+        });
+      });
+
+      state.receivables = state.receivables.filter(r => r.dueDay > state.day);
+
+      if (rand(1, 100) <= 35) generateRequestSilent();
+      if (rand(1, 100) <= 25) generateApplicantSilent();
+
+      randomDailyEvent();
+
+      state.stress = clamp(state.stress + state.contracts.filter(c => c.status === "inProgress").length * 2 - 3, 0, 100);
+
+      saveState();
+    }
+
+    function generateRequestSilent() {
+      const oldLogLength = state.log.length;
+      generateRequest();
+      state.log = state.log.slice(0, oldLogLength + 1);
+    }
+
+    function generateApplicantSilent() {
+      const branch = getBranch();
+      const skill = rand(25, 85);
+      const reliability = rand(35, 95);
+      const stressResist = rand(30, 90);
+      const role = pick(branch.roles);
+
+      state.applicants.push({
+        id: uid("app"),
+        name: pick(FIRST_NAMES) + " " + pick(LAST_NAMES),
+        role,
+        skill,
+        reliability,
+        stressResist,
+        costPerDay: Math.round(45 + skill * 0.9 + reliability * 0.4),
+        status: "Bewerber"
+      });
+
+      addLog("Ein neuer Bewerber ist verfügbar.", "info");
+    }
+
+    function randomDailyEvent() {
+      const active = state.contracts.filter(c => c.status === "inProgress");
+
+      if (active.length === 0) return;
+
+      const chance = clamp(10 + state.stress / 3, 10, 45);
+
+      if (rand(1, 100) > chance) return;
+
+      const contract = pick(active);
+      const event = pick([
+        "Ein NPC ist unkonzentriert. Risiko steigt.",
+        "Der Kunde ändert kurzfristig Details.",
+        "Materialkosten steigen unerwartet.",
+        "Equipment macht Probleme.",
+        "Die Frist wird enger als geplant."
+      ]);
+
+      contract.risk = clamp(contract.risk + rand(3, 12), 0, 95);
+      state.stress = clamp(state.stress + rand(4, 10), 0, 100);
+
+      addLog(`Ereignis bei ${contract.customer}: ${event}`, "bad");
+    }
+
+    function renderAll() {
+      renderHeader();
+      renderCompany();
+      renderBranches();
+      renderRequests();
+      renderContracts();
+      renderNPCs();
+      renderEquipment();
+      renderFinance();
+      renderReport();
+    }
+
+    function renderHeader() {
+      el.dayPill.textContent = "Tag " + state.day;
+      el.branchPill.textContent = state.started ? `${getBranch().icon} ${getBranch().name}` : "Keine Firma";
+    }
+
+    function renderCompany() {
+      el.setupBox.style.display = state.started ? "none" : "grid";
+
+      if (!state.started) {
+        el.companyDashboard.innerHTML = `
+          <div class="metric">
+            <div class="metric-number">Start</div>
+            <div class="metric-label">Firma gründen, Branche wählen, erste Verträge bearbeiten.</div>
+          </div>
+        `;
+        return;
+      }
+
+      const openContracts = state.contracts.filter(c => ["active", "inProgress", "waitingPayment"].includes(c.status)).length;
+      const receivables = state.receivables.reduce((sum, r) => sum + r.amount, 0);
+      const dailyCosts = state.employees.reduce((sum, npc) => sum + npc.costPerDay, 0)
+        + state.equipment.reduce((sum, eq) => sum + (eq.upkeep || 0), 0)
+        + 35 + Math.floor(state.employees.length * 8);
+
+      el.companyDashboard.innerHTML = `
+        <div class="metric">
+          <div class="metric-number">${state.companyName}</div>
+          <div class="metric-label">${getBranch().icon} ${getBranch().name}</div>
+        </div>
+        <div class="metric">
+          <div class="metric-number">${euro(state.cash)}</div>
+          <div class="metric-label">Kapital / Liquidität</div>
+        </div>
+        <div class="metric">
+          <div class="metric-number">${state.reputation}/100</div>
+          <div class="metric-label">Ruf</div>
+        </div>
+        <div class="metric">
+          <div class="metric-number">${Math.round(state.stress)}%</div>
+          <div class="metric-label">Stress</div>
+        </div>
+        <div class="metric">
+          <div class="metric-number">${openContracts}</div>
+          <div class="metric-label">aktive Verträge</div>
+        </div>
+        <div class="metric">
+          <div class="metric-number">${euro(receivables)}</div>
+          <div class="metric-label">offene Forderungen</div>
+        </div>
+        <div class="metric">
+          <div class="metric-number">${euro(dailyCosts)}</div>
+          <div class="metric-label">Tageskosten</div>
+        </div>
+        <div class="metric">
+          <div class="metric-number">${state.employees.length}</div>
+          <div class="metric-label">NPCs angestellt</div>
+        </div>
+      `;
+    }
+
+    function renderBranches() {
+      el.branchGrid.innerHTML = BRANCHES.map(branch => `
+        <div class="card branch-card ${branch.id === state.branchId ? "active" : ""}" onclick="previewBranch('${branch.id}')">
+          <div class="card-title">${branch.icon} ${branch.name}</div>
+          <div class="card-meta">${branch.desc}</div>
+          <div class="card-meta" style="margin-top:8px;">Rollen: ${branch.roles.join(", ")}</div>
+        </div>
+      `).join("");
+    }
+
+    window.previewBranch = function(branchId) {
+      if (state.started) {
+        alert("Branche ist in dieser Demo nach Firmenstart fest. Später kann man Geschäftsbereiche freischalten.");
+        return;
+      }
+
+      state.branchId = branchId;
+      el.startBranchSelect.value = branchId;
+      renderBranches();
+    };
+
+    function renderRequests() {
+      if (!state.started) {
+        el.requestList.innerHTML = `<div class="empty">Erst Firma gründen.</div>`;
+        return;
+      }
+
+      if (state.requests.length === 0) {
+        el.requestList.innerHTML = `<div class="empty">Keine offenen Anfragen. Generiere neue Anfragen.</div>`;
+        return;
+      }
+
+      el.requestList.innerHTML = state.requests.map(req => requestCard(req)).join("");
+    }
+
+    function requestCard(req) {
+      const expectedProfit = req.revenue - req.costs;
+      const riskClass = req.risk >= 60 ? "bad" : req.risk >= 35 ? "warn" : "good";
+
+      return `
+        <div class="card">
+          <div class="card-title">${req.customer}</div>
+          <div class="card-meta">
+            <strong>${req.title}</strong><br>
+            Vergütung: ${euro(req.revenue)} · Kosten: ${euro(req.costs)} · erwarteter Gewinn: ${euro(expectedProfit)}<br>
+            Zahlungsziel: ${req.paymentDays} Tage · Dauer: ${req.durationDays} Tage · Deadline: ${req.deadlineDays} Tage<br>
+            Vertragsstrafe: ${euro(req.penalty)} · Risiko: <span class="status ${riskClass}">${req.risk}%</span><br>
+            Benötigte Rollen: ${req.requiredRoles.join(", ") || "-"}<br>
+            Benötigtes Equipment: ${req.requiredEquipment.join(", ") || "-"}
+          </div>
+          <div class="card-actions">
+            <button class="btn-green" onclick="acceptRequest('${req.id}', 1)">Annehmen</button>
+            <button class="btn-gold" onclick="acceptRequest('${req.id}', 1.1)">Gegenangebot +10%</button>
+            <button class="btn-orange" onclick="acceptRequest('${req.id}', 1.2)">Gegenangebot +20%</button>
+            <button class="btn-red" onclick="rejectRequest('${req.id}')">Ablehnen</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderContracts() {
+      if (!state.started) {
+        el.contractList.innerHTML = `<div class="empty">Erst Firma gründen.</div>`;
+        return;
+      }
+
+      if (state.contracts.length === 0) {
+        el.contractList.innerHTML = `<div class="empty">Noch keine Verträge.</div>`;
+        return;
+      }
+
+      el.contractList.innerHTML = state.contracts.map(contract => contractCard(contract)).join("");
+    }
+
+    function contractCard(contract) {
+      const statusClass = contract.status === "paid" ? "good" :
+        contract.status === "failed" ? "bad" :
+        contract.status === "waitingPayment" ? "warn" : "";
+
+      const assigned = contract.assignedNpcIds || [];
+      const teamScore = calculateTeamScore(contract);
+
+      return `
+        <div class="card">
+          <div class="card-title">${contract.customer} · ${contract.title}</div>
+          <div class="card-meta">
+            Status: <span class="status ${statusClass}">${contract.status}</span><br>
+            Vergütung: ${euro(contract.revenue)} · Kosten: ${euro(contract.costs)} · Zahlung: ${contract.paymentDays} Tage<br>
+            Restdauer: ${contract.remainingDays ?? "-"} Tage · Risiko: ${contract.risk}% · Team-Score: ${teamScore}<br>
+            Rollen benötigt: ${contract.requiredRoles.join(", ") || "-"}<br>
+            Equipment benötigt: ${contract.requiredEquipment.join(", ") || "-"}<br>
+            Equipment vorhanden: ${hasRequiredEquipment(contract) ? "ja" : "nein"}
+          </div>
+
+          ${
+            ["active", "inProgress"].includes(contract.status)
+              ? `
+                <div class="check-list">
+                  ${state.employees.length === 0 ? `<div class="card-meta">Keine NPCs verfügbar.</div>` : state.employees.map(npc => `
+                    <label>
+                      <input type="checkbox" data-assign="${contract.id}" value="${npc.id}" ${assigned.includes(npc.id) ? "checked" : ""}>
+                      ${npc.name} · ${npc.role} · Skill ${npc.skill} · Zuverlässigkeit ${npc.reliability}
+                    </label>
+                  `).join("")}
+                </div>
+              `
+              : ""
+          }
+
+          <div class="card-actions">
+            ${contract.status === "active" ? `<button class="btn-blue" onclick="assignEmployees('${contract.id}')">NPCs zuweisen</button>` : ""}
+            ${contract.status === "active" ? `<button class="btn-green" onclick="startContract('${contract.id}')">Auftrag starten</button>` : ""}
+            ${contract.status === "inProgress" ? `<button class="btn-gold" onclick="completeContract('${contract.id}')">Abschließen</button>` : ""}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderNPCs() {
+      if (!state.started) {
+        el.employeeList.innerHTML = `<div class="empty">Erst Firma gründen.</div>`;
+        el.applicantList.innerHTML = `<div class="empty">Erst Firma gründen.</div>`;
+        return;
+      }
+
+      el.employeeList.innerHTML = state.employees.length === 0
+        ? `<div class="empty">Noch keine NPCs angestellt.</div>`
+        : state.employees.map(npc => `
+          <div class="card">
+            <div class="card-title">${npc.name}</div>
+            <div class="card-meta">
+              Rolle: ${npc.role}<br>
+              Skill: ${npc.skill} · Zuverlässigkeit: ${npc.reliability} · Stressresistenz: ${npc.stressResist}<br>
+              Kosten pro Tag: ${euro(npc.costPerDay)} · Moral: ${npc.morale || 70}
+            </div>
+            <div class="card-actions">
+              <button class="btn-red" onclick="fireEmployee('${npc.id}')">Entlassen</button>
+            </div>
+          </div>
+        `).join("");
+
+      el.applicantList.innerHTML = state.applicants.length === 0
+        ? `<div class="empty">Keine Bewerber. Suche neue Bewerber.</div>`
+        : state.applicants.map(app => `
+          <div class="card">
+            <div class="card-title">${app.name}</div>
+            <div class="card-meta">
+              Rolle: ${app.role}<br>
+              Skill: ${app.skill} · Zuverlässigkeit: ${app.reliability} · Stressresistenz: ${app.stressResist}<br>
+              Kosten pro Tag: ${euro(app.costPerDay)}
+            </div>
+            <div class="card-actions">
+              <button class="btn-green" onclick="hireApplicant('${app.id}')">Einstellen</button>
+            </div>
+          </div>
+        `).join("");
+    }
+
+    function renderEquipment() {
+      if (!state.started) {
+        el.ownedEquipmentList.innerHTML = `<div class="empty">Erst Firma gründen.</div>`;
+        el.equipmentShopList.innerHTML = `<div class="empty">Erst Firma gründen.</div>`;
+        return;
+      }
+
+      el.ownedEquipmentList.innerHTML = state.equipment.length === 0
+        ? `<div class="empty">Kein Equipment.</div>`
+        : state.equipment.map(eq => `
+          <div class="card">
+            <div class="card-title">${eq.name}</div>
+            <div class="card-meta">Zustand: ${eq.condition}% · Tagesunterhalt: ${euro(eq.upkeep || 0)} · Bonus: +${eq.bonus || 0}</div>
+          </div>
+        `).join("");
+
+      const ownedNames = state.equipment.map(eq => eq.name);
+
+      el.equipmentShopList.innerHTML = getEquipmentShop().map(item => `
+        <div class="card">
+          <div class="card-title">${item.name}</div>
+          <div class="card-meta">Preis: ${euro(item.cost)} · Unterhalt/Tag: ${euro(item.upkeep)} · Bonus: +${item.bonus}</div>
+          <div class="card-actions">
+            <button class="btn-gold" onclick="buyEquipment('${item.name}')" ${state.cash < item.cost ? "disabled" : ""}>
+              Kaufen
+            </button>
+            ${ownedNames.includes(item.name) ? `<span class="status good">bereits vorhanden</span>` : ""}
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function renderFinance() {
+      const receivables = state.receivables.reduce((sum, r) => sum + r.amount, 0);
+      const payroll = state.employees.reduce((sum, npc) => sum + npc.costPerDay, 0);
+      const upkeep = state.equipment.reduce((sum, eq) => sum + (eq.upkeep || 0), 0);
+      const dailyCosts = payroll + upkeep + 35 + Math.floor(state.employees.length * 8);
+
+      el.financeDashboard.innerHTML = `
+        <div class="metric">
+          <div class="metric-number">${euro(state.cash)}</div>
+          <div class="metric-label">Kapital</div>
+        </div>
+        <div class="metric">
+          <div class="metric-number">${euro(receivables)}</div>
+          <div class="metric-label">offene Forderungen</div>
+        </div>
+        <div class="metric">
+          <div class="metric-number">${euro(dailyCosts)}</div>
+          <div class="metric-label">Tageskosten</div>
+        </div>
+        <div class="metric">
+          <div class="metric-number">${state.completedContracts}</div>
+          <div class="metric-label">erfolgreiche Verträge</div>
+        </div>
+        <div class="metric">
+          <div class="metric-number">${state.failedContracts}</div>
+          <div class="metric-label">gescheiterte Verträge</div>
+        </div>
+      `;
+
+      el.receivableList.innerHTML = state.receivables.length === 0
+        ? `<div class="empty">Keine offenen Forderungen.</div>`
+        : state.receivables.map(r => `
+          <div class="card">
+            <div class="card-title">${r.customer}</div>
+            <div class="card-meta">${euro(r.amount)} · fällig an Tag ${r.dueDay}</div>
+          </div>
+        `).join("");
+
+      el.financeLog.innerHTML = state.log.length === 0
+        ? `<div class="empty">Noch kein Log.</div>`
+        : state.log.map(item => `
+          <div class="log-item">Tag ${item.day}: ${item.text}</div>
+        `).join("");
+    }
+
+    function renderReport() {
+      if (!state.started) {
+        el.reportBox.innerHTML = `<div class="empty">Erst Firma gründen.</div>`;
+        return;
+      }
+
+      const active = state.contracts.filter(c => ["active", "inProgress"].includes(c.status)).length;
+      const waiting = state.contracts.filter(c => c.status === "waitingPayment").length;
+      const receivables = state.receivables.reduce((sum, r) => sum + r.amount, 0);
+
+      el.reportBox.innerHTML = `
+        <div class="card">
+          <div class="card-title">Kurzbericht Tag ${state.day}</div>
+          <div class="card-meta">
+            Firma: ${state.companyName}<br>
+            Branche: ${getBranch().name}<br>
+            Kapital: ${euro(state.cash)}<br>
+            Ruf: ${state.reputation}/100<br>
+            Stress: ${Math.round(state.stress)}%<br>
+            Aktive Verträge: ${active}<br>
+            Wartet auf Zahlung: ${waiting}<br>
+            Offene Forderungen: ${euro(receivables)}<br>
+            NPCs: ${state.employees.length}<br>
+            Equipment: ${state.equipment.length}<br>
+            Erfolgreiche Verträge: ${state.completedContracts}<br>
+            Gescheiterte Verträge: ${state.failedContracts}
+          </div>
+        </div>
+      `;
+    }
+
+    function printReport() {
+      const w = window.open("", "_blank");
+      if (!w) return alert("Popup blockiert.");
+
+      const receivables = state.receivables.reduce((sum, r) => sum + r.amount, 0);
+
+      w.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="UTF-8">
+          <title>ContractOps Bericht</title>
+          <style>
+            body { font-family: Arial, sans-serif; color:#111; padding:24px; }
+            h1 { margin-bottom:4px; }
+            table { width:100%; border-collapse:collapse; margin-top:16px; }
+            td, th { border:1px solid #999; padding:8px; text-align:left; }
+            th { background:#eee; }
+          </style>
+        </head>
+        <body>
+          <h1>ContractOps Bericht</h1>
+          <div>Firma: ${state.companyName} · Tag ${state.day}</div>
+          <table>
+            <tr><th>Kennzahl</th><th>Wert</th></tr>
+            <tr><td>Branche</td><td>${getBranch().name}</td></tr>
+            <tr><td>Kapital</td><td>${euro(state.cash)}</td></tr>
+            <tr><td>Ruf</td><td>${state.reputation}/100</td></tr>
+            <tr><td>Stress</td><td>${Math.round(state.stress)}%</td></tr>
+            <tr><td>Offene Forderungen</td><td>${euro(receivables)}</td></tr>
+            <tr><td>NPCs</td><td>${state.employees.length}</td></tr>
+            <tr><td>Equipment</td><td>${state.equipment.length}</td></tr>
+            <tr><td>Erfolgreiche Verträge</td><td>${state.completedContracts}</td></tr>
+            <tr><td>Gescheiterte Verträge</td><td>${state.failedContracts}</td></tr>
+          </table>
+          <script>window.onload = () => window.print();<\/script>
+        </body>
+        </html>
+      `);
+
+      w.document.close();
+    }
+
+    function exportState() {
+      const data = JSON.stringify(state, null, 2);
+      navigator.clipboard.writeText(data)
+        .then(() => alert("Spielstand wurde in die Zwischenablage kopiert."))
+        .catch(() => prompt("Spielstand kopieren:", data));
+    }
+
+    function importState() {
+      const raw = prompt("Spielstand JSON einfügen:");
+      if (!raw) return;
+
+      try {
+        state = JSON.parse(raw);
+        saveState();
+        alert("Spielstand importiert.");
+      } catch (error) {
+        alert("Import fehlgeschlagen: " + error.message);
+      }
+    }
+
+    function resetState() {
+      if (!confirm("Spielstand wirklich löschen?")) return;
+
+      localStorage.removeItem(STORAGE_KEY);
+      state = createEmptyState();
+      renderAll();
+    }
+
+    window.acceptRequest = acceptRequest;
+    window.rejectRequest = rejectRequest;
+    window.hireApplicant = hireApplicant;
+    window.fireEmployee = fireEmployee;
+    window.buyEquipment = buyEquipment;
+    window.assignEmployees = assignEmployees;
+    window.startContract = startContract;
+    window.completeContract = completeContract;
+
+    el.startCompanyBtn.addEventListener("click", startCompany);
+    el.generateRequestBtn.addEventListener("click", generateRequest);
+    el.generateThreeBtn.addEventListener("click", () => {
+      generateRequest();
+      generateRequest();
+      generateRequest();
+    });
+    el.generateApplicantsBtn.addEventListener("click", () => generateApplicants(3));
+    el.nextDayBtn.addEventListener("click", nextDay);
+    el.saveBtn.addEventListener("click", saveState);
+    el.printReportBtn.addEventListener("click", printReport);
+    el.exportBtn.addEventListener("click", exportState);
+    el.importBtn.addEventListener("click", importState);
+    el.resetBtn.addEventListener("click", resetState);
+
+    setupTabs();
+    initSelectors();
+    loadState();
+    renderAll();
+  </script>
+</body>
+</html>
